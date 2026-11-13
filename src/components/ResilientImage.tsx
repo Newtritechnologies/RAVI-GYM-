@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Utensils } from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 
 interface ResilientImageProps {
   src: string;
@@ -23,7 +23,7 @@ export function ResilientImage({
         aria-label={alt}
         className={`flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#1C1410] via-[#130D0A] to-[#0B0807] text-[#C8B9A6] p-6 text-center ${className}`}
       >
-        <Utensils className="w-6 h-6 text-[#E6840E]" aria-hidden="true" />
+        <Dumbbell className="w-6 h-6 text-[#FF991F]" aria-hidden="true" />
         <span className="text-xs font-medium tracking-wide text-[#E5D7C6] max-w-[20ch] truncate">
           {alt}
         </span>

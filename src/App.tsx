@@ -1,42 +1,43 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DishDetailModal } from './components/DishDetailModal';
+import { BookingModal, type BookingIntent } from './components/BookingModal';
+import { DetailModal, type DetailSelection } from './components/DetailModal';
+import { EquipmentsView } from './components/EquipmentsView';
 import { FacilitiesView } from './components/FacilitiesView';
 import { Footer } from './components/Footer';
-import { GalleryView } from './components/GalleryView';
 import { HomeView } from './components/HomeView';
-import { MenuView } from './components/MenuView';
 import { Navbar } from './components/Navbar';
-import { ReservationModal } from './components/ReservationModal';
-import { StoryView } from './components/StoryView';
-import type { DishItem, PageRoute } from './data/restaurantData';
+import { OffersView } from './components/OffersView';
+import { TrainersView } from './components/TrainersView';
+import type { GymPageRoute } from './data/gymData';
 
-const VALID_PAGES: PageRoute[] = [
+const VALID_PAGES: GymPageRoute[] = [
   'home',
-  'menu',
-  'story',
+  'offers',
+  'equipments',
+  'trainers',
   'facilities',
-  'gallery',
 ];
 
-function getInitialPage(): PageRoute {
+function getInitialPage(): GymPageRoute {
   if (typeof window === 'undefined') return 'home';
   const hash = window.location.hash.replace('#/', '').replace('#', '');
-  if (VALID_PAGES.includes(hash as PageRoute)) {
-    return hash as PageRoute;
+  if (VALID_PAGES.includes(hash as GymPageRoute)) {
+    return hash as GymPageRoute;
   }
   return 'home';
 }
 
 export default function App() {
-  const [activePage, setActivePage] = useState<PageRoute>(getInitialPage);
-  const [selectedDish, setSelectedDish] = useState<DishItem | null>(null);
-  const [reserveOpen, setReserveOpen] = useState(false);
-  const [preferredSpace, setPreferredSpace] = useState<string | undefined>(
-    undefined
-  );
-  const [shortlistCounts, setShortlistCounts] = useState<
-    Record<string, number>
-  >({});
+  const [activePage, setActivePage] = useState<GymPageRoute>(getInitialPage);
+  const [detailSelection, setDetailSelection] = useState<DetailSelection>(null);
+  const [bookingState, setBookingState] = useState<{
+    open: boolean;
+    intent: BookingIntent;
+    label?: string;
+  }>({
+    open: false,
+    intent: 'trial',
+  });
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -46,7 +47,7 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = useCallback((page: PageRoute) => {
+  const handleNavigate = useCallback((page: GymPageRoute) => {
     setActivePage(page);
     if (typeof window !== 'undefined') {
       const nextHash = page === 'home' ? '#/' : `#/${page}`;
@@ -57,91 +58,95 @@ export default function App() {
     }
   }, []);
 
-  const handleOpenReserve = useCallback((spaceName?: string) => {
-    setPreferredSpace(spaceName);
-    setReserveOpen(true);
-  }, []);
-
-  const handleUpdateShortlist = useCallback((dishId: string, delta: number) => {
-    setShortlistCounts((prev) => {
-      const nextQty = Math.max(0, (prev[dishId] || 0) + delta);
-      if (nextQty === 0) {
-        const copy = { ...prev };
-        delete copy[dishId];
-        return copy;
-      }
-      return { ...prev, [dishId]: nextQty };
-    });
-  }, []);
-
-  const handleClearShortlist = useCallback(() => {
-    setShortlistCounts({});
-  }, []);
+  const openBooking = useCallback(
+    (intent: BookingIntent = 'trial', label?: string) => {
+      setBookingState({ open: true, intent, label });
+    },
+    []
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0807] text-[#F5EFE6]">
       <Navbar
         activePage={activePage}
         onNavigate={handleNavigate}
-        onOpenReserve={() => handleOpenReserve()}
+        onOpenBooking={() => openBooking('trial')}
       />
 
       <main className="flex-1">
         {activePage === 'home' && (
           <HomeView
             onNavigate={handleNavigate}
-            onOpenReserve={() => handleOpenReserve()}
-            onSelectDish={setSelectedDish}
+            onOpenBooking={() => openBooking('trial')}
+            onInspectOffer={(offer) =>
+              setDetailSelection({ type: 'offer', data: offer })
+            }
+            onInspectEquipment={(equipment) =>
+              setDetailSelection({ type: 'equipment', data: equipment })
+            }
+            onInspectTrainer={(trainer) =>
+              setDetailSelection({ type: 'trainer', data: trainer })
+            }
           />
         )}
 
-        {activePage === 'menu' && (
-          <MenuView
-            onSelectDish={setSelectedDish}
-            shortlistCounts={shortlistCounts}
-            onOpenReserve={() => handleOpenReserve()}
+        {activePage === 'offers' && (
+          <OffersView
+            onSelectOffer={(offer) =>
+              setDetailSelection({ type: 'offer', data: offer })
+            }
+            onClaimOffer={(offer) => openBooking('offer', offer.title)}
           />
         )}
 
-        {activePage === 'story' && (
-          <StoryView
-            onNavigate={handleNavigate}
-            onOpenReserve={() => handleOpenReserve()}
+        {activePage === 'equipments' && (
+          <EquipmentsView
+            onSelectEquipment={(equipment) =>
+              setDetailSelection({ type: 'equipment', data: equipment })
+            }
+          />
+        )}
+
+        {activePage === 'trainers' && (
+          <TrainersView
+            onSelectTrainer={(trainer) =>
+              setDetailSelection({ type: 'trainer', data: trainer })
+            }
+            onBookTrainer={(trainer) => openBooking('trainer', trainer.name)}
           />
         )}
 
         {activePage === 'facilities' && (
           <FacilitiesView
-            onBookSpace={(spaceName) => handleOpenReserve(spaceName)}
+            onSelectFacility={(facility) =>
+              setDetailSelection({ type: 'facility', data: facility })
+            }
+            onBookTour={(facilityName) => openBooking('tour', facilityName)}
           />
         )}
-
-        {activePage === 'gallery' && <GalleryView />}
       </main>
 
       <Footer
         onNavigate={handleNavigate}
-        onOpenReserve={() => handleOpenReserve()}
+        onOpenBooking={() => openBooking('trial')}
       />
 
-      <DishDetailModal
-        dish={selectedDish}
-        quantity={selectedDish ? shortlistCounts[selectedDish.id] || 0 : 0}
-        onClose={() => setSelectedDish(null)}
-        onUpdateQuantity={handleUpdateShortlist}
-        onReserveWithDish={() => {
-          setSelectedDish(null);
-          handleOpenReserve();
+      <DetailModal
+        selection={detailSelection}
+        onClose={() => setDetailSelection(null)}
+        onProceedAction={({ intent, label }) => {
+          setDetailSelection(null);
+          openBooking(intent, label);
         }}
       />
 
-      <ReservationModal
-        isOpen={reserveOpen}
-        initialSpace={preferredSpace}
-        shortlistCounts={shortlistCounts}
-        onUpdateShortlist={handleUpdateShortlist}
-        onClearShortlist={handleClearShortlist}
-        onClose={() => setReserveOpen(false)}
+      <BookingModal
+        isOpen={bookingState.open}
+        initialIntent={bookingState.intent}
+        initialSelectionLabel={bookingState.label}
+        onClose={() =>
+          setBookingState((prev) => ({ ...prev, open: false }))
+        }
       />
     </div>
   );
