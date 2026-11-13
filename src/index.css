@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-body);
+    background-color: #0b0807;
+    color: #f5efe6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+.ravi-amber-glow {
+  background: radial-gradient(
+    ellipse 55% 65% at 88% 38%,
+    rgba(217, 108, 12, 0.24) 0%,
+    rgba(139, 52, 8, 0.14) 40%,
+    rgba(11, 8, 7, 0) 75%
+  );
+}
+
+.ravi-story-glow {
+  background: radial-gradient(
+    ellipse 50% 80% at 82% 45%,
+    rgba(217, 108, 12, 0.26) 0%,
+    rgba(128, 46, 8, 0.14) 45%,
+    rgba(11, 8, 7, 0) 78%
+  );
+}

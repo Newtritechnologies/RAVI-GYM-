@@ -1,0 +1,6 @@
+{
+  "name": "RAVI Restaurant",
+  "description": "Modern Indian kitchen in Khan Market, New Delhi since 1987. Regional recipes, clay-oven tandoor dishes, slow-simmered curries, and warm hospitality.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
